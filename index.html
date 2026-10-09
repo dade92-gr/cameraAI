@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOSS AI Vision — Test Kamera</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #10b981;
+    --primary-dark: #059669;
+    --primary-light: #d1fae5;
+    --dark: #0f172a;
+    --gray: #64748b;
+    --light: #f8fafc;
+    --border: #e2e8f0;
+  }
+
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #f0f9ff 100%);
+    min-height: 100vh;
+    color: var(--dark);
+    padding: 24px 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    text-align: center;
+    padding: 32px 20px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #10b981, #06b6d4, #3b82f6);
+  }
+
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 20px;
+    font-size: 2em;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+  }
+
+  .header h1 {
+    font-size: 2.2em;
+    font-weight: 800;
+    color: var(--dark);
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  .header h1 .accent {
+    background: linear-gradient(135deg, #10b981, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    font-size: 0.95em;
+    color: var(--gray);
+    font-weight: 500;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .school-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: var(--primary-light);
+    border-radius: 100px;
+    font-size: 0.85em;
+    color: var(--primary-dark);
+    font-weight: 600;
+  }
+
+  .school-info .dot {
+    width: 8px;
+    height: 8px;
+    background: var(--primary);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.2); }
+  }
+
+  /* ===== CARD ===== */
+  .card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+    padding: 24px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .card-header h2 {
+    font-size: 1em;
+    font-weight: 700;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .badge {
+    font-size: 0.7em;
+    font-weight: 700;
+    padding: 4px 10px;
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge.live {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+
+  .badge.live::before {
+    content: '● ';
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ===== KAMERA ===== */
+  .camera-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 340px;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-radius: 16px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    position: relative;
+    border: 2px dashed var(--border);
+  }
+
+  .camera-wrapper.active {
+    border: 2px solid var(--primary);
+    border-style: solid;
+  }
+
+  .camera-wrapper canvas {
+    border-radius: 14px;
+    max-width: 100%;
+    display: block;
+  }
+
+  .placeholder {
+    text-align: center;
+    color: #94a3b8;
+    padding: 40px 20px;
+  }
+
+  .placeholder .icon {
+    font-size: 3.5em;
+    margin-bottom: 12px;
+    opacity: 0.7;
+  }
+
+  .placeholder .text {
+    font-size: 0.9em;
+    font-weight: 500;
+  }
+
+  /* ===== TOMBOL ===== */
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px;
+    font-size: 1em;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+    font-family: inherit;
+  }
+
+  .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  }
+
+  .btn:active:not(:disabled) { transform: translateY(0); }
+
+  .btn:disabled {
+    background: #cbd5e1;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  .btn-sm {
+    padding: 10px 16px;
+    font-size: 0.85em;
+    width: auto;
+    border-radius: 10px;
+  }
+
+  /* ===== KONTROL KAMERA ===== */
+  .camera-controls {
+    display: none;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--light);
+    border-radius: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .camera-controls label {
+    font-size: 0.85em;
+    font-weight: 700;
+    color: var(--gray);
+  }
+
+  .camera-controls select {
+    flex: 1;
+    min-width: 150px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    font-size: 0.85em;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    background: white;
+    color: var(--dark);
+  }
+
+  .camera-controls select:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  /* ===== HASIL PREDIKSI ===== */
+  .prediction-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .prediction-item {
+    background: var(--light);
+    border-radius: 14px;
+    padding: 16px 18px;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+  }
+
+  .prediction-item.top {
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    border-color: #86efac;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.15);
+  }
+
+  .prediction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .class-name {
+    font-weight: 700;
+    font-size: 1em;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .prediction-item.top .class-name::before {
+    content: '✓';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    font-size: 0.7em;
+  }
+
+  .probability {
+    font-weight: 800;
+    font-size: 1.1em;
+    color: var(--gray);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .prediction-item.top .probability {
+    color: var(--primary-dark);
+  }
+
+  .bar {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #94a3b8, #64748b);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  .prediction-item.top .bar-fill {
+    background: linear-gradient(90deg, #10b981, #059669);
+  }
+
+  /* ===== STATUS ===== */
+  .status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 0.9em;
+    color: var(--gray);
+    padding: 16px;
+    font-weight: 500;
+  }
+
+  .status .indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #cbd5e1;
+  }
+
+  .status.active { color: var(--primary-dark); }
+  .status.active .indicator { background: var(--primary); animation: pulse 2s infinite; }
+  .status.error { color: #ef4444; }
+  .status.error .indicator { background: #ef4444; }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    text-align: center;
+    padding: 24px 16px;
+    color: var(--gray);
+    font-size: 0.8em;
+    line-height: 1.7;
+  }
+
+  .footer .team {
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 4px;
+  }
+
+  .footer .divider {
+    margin: 8px auto;
+    width: 40px;
+    height: 2px;
+    background: var(--border);
+    border-radius: 1px;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 600px) {
+    .header h1 { font-size: 1.6em; }
+    .logo-badge { width: 60px; height: 60px; font-size: 1.6em; }
+    .card { padding: 18px; }
+    .camera-wrapper { min-height: 260px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ===== HEADER ===== -->
+  <div class="header">
+    <div class="logo-badge">🗑️</div>
+    <h1><span class="accent">TOSS</span> AI Vision</h1>
+    <p class="subtitle">
+      <strong>Trash Organizing Smart System</strong><br>
+      Tes Model AI — Deteksi Botol & Aqua Gelas
+    </p>
+    <div class="school-info">
+      <span class="dot"></span>
+      SMK Negeri 1 Terisi — STEAMpreneur SMK 2026
+    </div>
+  </div>
+
+  <!-- ===== CARD KAMERA ===== -->
+  <div class="card">
+    <div class="card-header">
+      <h2>📷 Kamera AI</h2>
+      <span class="badge" id="badge-status">Standby</span>
+    </div>
+
+    <div class="camera-wrapper" id="camera-wrapper">
+      <div class="placeholder" id="placeholder">
+        <div class="icon">📷</div>
+        <div class="text">Kamera belum aktif</div>
+      </div>
+    </div>
+
+    <button class="btn" id="start-button" onclick="init()">
+      🎥 Mulai Kamera & AI
+    </button>
+
+    <!-- KONTROL KAMERA (muncul setelah start) -->
+    <div class="camera-controls" id="camera-controls">
+      <label>📷 Kamera:</label>
+      <select id="camera-select" onchange="changeCameraMode(this.value)">
+        <option value="environment">Belakang (Utama)</option>
+        <option value="user">Depan (Selfie)</option>
+      </select>
+      <button class="btn btn-sm" onclick="switchCamera()">
+        🔄 Ganti
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== CARD HASIL ===== -->
+  <div class="card" id="result-card" style="display: none;">
+    <div class="card-header">
+      <h2>🎯 Hasil Prediksi</h2>
+      <span class="badge live">Live</span>
+    </div>
+    <div class="prediction-list" id="label-container"></div>
+  </div>
+
+  <!-- ===== STATUS ===== -->
+  <div class="status" id="status">
+    <span class="indicator"></span>
+    <span id="status-text">Menunggu kamera...</span>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <div class="footer">
+    <div class="team">Tim TOSS</div>
+    <div>Muhamad Fahri Anangga · Ehgy Hamza · Fahmi Raditya Farobi</div>
+    <div class="divider"></div>
+    <div>Guru Pendamping: Dade Sugiono, S.Pd</div>
+    <div>SMK Negeri 1 Terisi © 2026</div>
+  </div>
+
+</div>
+
+<!-- TensorFlow.js & Teachable Machine -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.3/dist/teachablemachine-image.min.js"></script>
+
+<script>
+  const URL_MODEL = "./my_model/";
+  let model, webcam, labelContainer, maxPredictions;
+  let isRunning = false;
+  let currentFacingMode = "environment"; // belakang = default
+
+  // Cek dukungan browser
+  function checkSupport() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      return "Browser tidak mendukung akses kamera";
+    }
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+      return "Kamera hanya bisa diakses via HTTPS atau localhost.\n" +
+             "Saat ini: " + location.protocol + "//" + location.hostname;
+    }
+    return null;
+  }
+
+  async function init() {
+    const btn = document.getElementById("start-button");
+    const badgeStatus = document.getElementById("badge-status");
+    const placeholder = document.getElementById("placeholder");
+    const resultCard = document.getElementById("result-card");
+    const cameraWrapper = document.getElementById("camera-wrapper");
+    const status = document.getElementById("status");
+    const statusText = document.getElementById("status-text");
+
+    const supportError = checkSupport();
+    if (supportError) {
+      alert("❌ " + supportError);
+      statusText.textContent = supportError;
+      status.classList.add("error");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "⏳ Memuat model...";
+    badgeStatus.textContent = "Loading";
+    statusText.textContent = "Memuat model AI...";
+
+    try {
+      const modelURL = URL_MODEL + "model.json";
+      const metadataURL = URL_MODEL + "metadata.json";
+
+      const response = await fetch(modelURL);
+      if (!response.ok) {
+        throw new Error("File model tidak ditemukan: " + modelURL);
+      }
+
+      model = await tmImage.load(modelURL, metadataURL);
+      maxPredictions = model.getTotalClasses();
+
+      statusText.textContent = "Model siap. Membuka kamera...";
+      btn.textContent = "⏳ Membuka kamera...";
+
+      await setupWebcam();
+
+      placeholder.style.display = "none";
+      cameraWrapper.appendChild(webcam.canvas);
+      cameraWrapper.classList.add("active");
+      resultCard.style.display = "block";
+
+      // Siapkan label container
+      labelContainer = document.getElementById("label-container");
+      labelContainer.innerHTML = "";
+      for (let i = 0; i < maxPredictions; i++) {
+        const item = document.createElement("div");
+        item.className = "prediction-item";
+        item.innerHTML = `
+          <div class="prediction-header">
+            <span class="class-name">...</span>
+            <span class="probability">0%</span>
+          </div>
+          <div class="bar"><div class="bar-fill"></div></div>
+        `;
+        labelContainer.appendChild(item);
+      }
+
+      // Tampilkan kontrol kamera
+      document.getElementById("camera-controls").style.display = "flex";
+
+      // Update UI
+      btn.style.display = "none";
+      statusText.textContent = "AI aktif — arahkan kamera ke sampah";
+      status.classList.add("active");
+      badgeStatus.textContent = "Aktif";
+      badgeStatus.classList.add("live");
+
+      isRunning = true;
+      window.requestAnimationFrame(loop);
+
+    } catch (err) {
+      console.error("Error:", err);
+      btn.disabled = false;
+      btn.textContent = "🔄 Coba Lagi";
+      statusText.textContent = "Error: " + (err.message || err.toString());
+      status.classList.add("error");
+      badgeStatus.textContent = "Error";
+      alert("❌ " + (err.message || err.toString()));
+    }
+  }
+
+  // Setup webcam dengan facingMode
+  async function setupWebcam() {
+    const width = 320;
+    const height = 320;
+
+    // Hapus canvas lama
+    const wrapper = document.getElementById("camera-wrapper");
+    const oldCanvas = wrapper.querySelector("canvas");
+    if (oldCanvas) oldCanvas.remove();
+
+    // Stop webcam lama
+    if (webcam) {
+      try { webcam.stop(); } catch (e) { console.log("Stop:", e); }
+    }
+
+    webcam = new tmImage.Webcam(width, height, true);
+    await webcam.setup({ facingMode: currentFacingMode });
+    await webcam.play();
+  }
+
+  // Switch kamera
+  async function switchCamera() {
+    if (!isRunning) return;
+
+    currentFacingMode = (currentFacingMode === "environment") ? "user" : "environment";
+    document.getElementById("camera-select").value = currentFacingMode;
+
+    const statusText = document.getElementById("status-text");
+    statusText.textContent = "Mengganti kamera...";
+
+    try {
+      await setupWebcam();
+      document.getElementById("camera-wrapper").appendChild(webcam.canvas);
+      statusText.textContent = "Kamera " +
+        (currentFacingMode === "environment" ? "belakang" : "depan") + " aktif";
+    } catch (err) {
+      console.error("Gagal ganti kamera:", err);
+      alert("Gagal ganti kamera: " + err.message);
+      statusText.textContent = "Gagal ganti kamera";
+    }
+  }
+
+  // Dropdown kamera
+  async function changeCameraMode(mode) {
+    currentFacingMode = mode;
+    if (!isRunning) return;
+
+    const statusText = document.getElementById("status-text");
+    statusText.textContent = "Mengganti kamera...";
+
+    try {
+      await setupWebcam();
+      document.getElementById("camera-wrapper").appendChild(webcam.canvas);
+      statusText.textContent = "Kamera " +
+        (currentFacingMode === "environment" ? "belakang" : "depan") + " aktif";
+    } catch (err) {
+      console.error("Gagal ganti kamera:", err);
+      alert("Gagal ganti kamera: " + err.message);
+    }
+  }
+
+  async function loop() {
+    if (!isRunning) return;
+    webcam.update();
+    await predict();
+    window.requestAnimationFrame(loop);
+  }
+
+  async function predict() {
+    const prediction = await model.predict(webcam.canvas);
+
+    let topIndex = 0;
+    let topProb = 0;
+    for (let i = 0; i < maxPredictions; i++) {
+      if (prediction[i].probability > topProb) {
+        topProb = prediction[i].probability;
+        topIndex = i;
+      }
+    }
+
+    for (let i = 0; i < maxPredictions; i++) {
+      const item = labelContainer.childNodes[i];
+      const prob = (prediction[i].probability * 100).toFixed(0);
+
+      item.querySelector(".class-name").textContent = prediction[i].className;
+      item.querySelector(".probability").textContent = prob + "%";
+      item.querySelector(".bar-fill").style.width = prob + "%";
+
+      if (i === topIndex && topProb > 0.5) {
+        item.classList.add("top");
+      } else {
+        item.classList.remove("top");
+      }
+    }
+  }
+</script>
+
+</body>
+</html>
