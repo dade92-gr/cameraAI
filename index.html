@@ -26,10 +26,7 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  .container {
-    max-width: 900px;
-    margin: 0 auto;
-  }
+  .container { max-width: 900px; margin: 0 auto; }
 
   /* ===== HEADER ===== */
   .header {
@@ -46,9 +43,7 @@
   .header::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     height: 4px;
     background: linear-gradient(90deg, #10b981, #06b6d4, #3b82f6);
   }
@@ -57,8 +52,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 72px;
-    height: 72px;
+    width: 72px; height: 72px;
     background: linear-gradient(135deg, #10b981, #059669);
     border-radius: 20px;
     font-size: 2em;
@@ -105,8 +99,7 @@
   }
 
   .school-info .dot {
-    width: 8px;
-    height: 8px;
+    width: 8px; height: 8px;
     background: var(--primary);
     border-radius: 50%;
     animation: pulse 2s infinite;
@@ -236,13 +229,7 @@
     box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
   }
 
-  .btn:active:not(:disabled) { transform: translateY(0); }
-
-  .btn:disabled {
-    background: #cbd5e1;
-    box-shadow: none;
-    cursor: not-allowed;
-  }
+  .btn:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; }
 
   .btn-sm {
     padding: 10px 16px;
@@ -283,9 +270,81 @@
     color: var(--dark);
   }
 
-  .camera-controls select:focus {
-    outline: none;
-    border-color: var(--primary);
+  /* ============================================
+     KARTU OBJEK TERDETEKSI — BARU
+     ============================================ */
+  .detected-object {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .detected-object::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .detected-label {
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.9;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+
+  .detected-emoji {
+    font-size: 4em;
+    line-height: 1;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+  }
+
+  .detected-name {
+    font-size: 2em;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .detected-desc {
+    font-size: 0.9em;
+    opacity: 0.9;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+
+  .detected-confidence {
+    display: inline-block;
+    padding: 6px 16px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 100px;
+    font-size: 0.85em;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
+  }
+
+  /* Kalau tidak ada objek / confidence rendah */
+  .detected-object.empty {
+    background: linear-gradient(135deg, #94a3b8, #64748b);
+    box-shadow: 0 8px 24px rgba(100, 116, 139, 0.3);
+  }
+
+  .detected-object.low-confidence {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
   }
 
   /* ===== HASIL PREDIKSI ===== */
@@ -314,6 +373,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
+    gap: 10px;
   }
 
   .class-name {
@@ -330,12 +390,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 20px; height: 20px;
     background: var(--primary);
     color: white;
     border-radius: 50%;
     font-size: 0.7em;
+    flex-shrink: 0;
   }
 
   .probability {
@@ -382,8 +442,7 @@
   }
 
   .status .indicator {
-    width: 10px;
-    height: 10px;
+    width: 10px; height: 10px;
     border-radius: 50%;
     background: #cbd5e1;
   }
@@ -410,18 +469,18 @@
 
   .footer .divider {
     margin: 8px auto;
-    width: 40px;
-    height: 2px;
+    width: 40px; height: 2px;
     background: var(--border);
     border-radius: 1px;
   }
 
-  /* ===== RESPONSIVE ===== */
   @media (max-width: 600px) {
     .header h1 { font-size: 1.6em; }
     .logo-badge { width: 60px; height: 60px; font-size: 1.6em; }
     .card { padding: 18px; }
     .camera-wrapper { min-height: 260px; }
+    .detected-name { font-size: 1.6em; }
+    .detected-emoji { font-size: 3em; }
   }
 </style>
 </head>
@@ -461,23 +520,36 @@
       🎥 Mulai Kamera & AI
     </button>
 
-    <!-- KONTROL KAMERA (muncul setelah start) -->
     <div class="camera-controls" id="camera-controls">
       <label>📷 Kamera:</label>
       <select id="camera-select" onchange="changeCameraMode(this.value)">
         <option value="environment">Belakang (Utama)</option>
         <option value="user">Depan (Selfie)</option>
       </select>
-      <button class="btn btn-sm" onclick="switchCamera()">
-        🔄 Ganti
-      </button>
+      <button class="btn btn-sm" onclick="switchCamera()">🔄 Ganti</button>
     </div>
   </div>
 
-  <!-- ===== CARD HASIL ===== -->
+  <!-- ===== CARD OBJEK TERDETEKSI (BARU) ===== -->
+  <div class="card" id="detected-card" style="display: none;">
+    <div class="card-header">
+      <h2>🤖 AI Membaca</h2>
+      <span class="badge live">Live</span>
+    </div>
+
+    <div class="detected-object" id="detected-object">
+      <div class="detected-label">Objek Terdeteksi</div>
+      <div class="detected-emoji" id="detected-emoji">❓</div>
+      <div class="detected-name" id="detected-name">Menunggu...</div>
+      <div class="detected-desc" id="detected-desc">Arahkan kamera ke objek</div>
+      <div class="detected-confidence" id="detected-confidence">0% yakin</div>
+    </div>
+  </div>
+
+  <!-- ===== CARD SEMUA PREDIKSI ===== -->
   <div class="card" id="result-card" style="display: none;">
     <div class="card-header">
-      <h2>🎯 Hasil Prediksi</h2>
+      <h2>📊 Detail Semua Prediksi</h2>
       <span class="badge live">Live</span>
     </div>
     <div class="prediction-list" id="label-container"></div>
@@ -506,11 +578,30 @@
 
 <script>
   const URL_MODEL = "./my_model/";
+
+  // ============================================================
+  // KAMUS OBJEK — info detail per kelas
+  // GANTI sesuai nama kelas dari Teachable Machine
+  // ============================================================
+  const OBJECT_INFO = {
+    "Botol": {
+      emoji: "🍶",
+      name: "Botol Plastik",
+      desc: "Botol air mineral / minuman PET",
+      kategori: "Botol/Gelas Plastik"
+    },
+    "Aqua Gelas": {
+      emoji: "🥤",
+      name: "Aqua Gelas",
+      desc: "Gelas plastik air mineral",
+      kategori: "Botol/Gelas Plastik"
+    }
+  };
+
   let model, webcam, labelContainer, maxPredictions;
   let isRunning = false;
-  let currentFacingMode = "environment"; // belakang = default
+  let currentFacingMode = "environment";
 
-  // Cek dukungan browser
   function checkSupport() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       return "Browser tidak mendukung akses kamera";
@@ -527,6 +618,7 @@
     const badgeStatus = document.getElementById("badge-status");
     const placeholder = document.getElementById("placeholder");
     const resultCard = document.getElementById("result-card");
+    const detectedCard = document.getElementById("detected-card");
     const cameraWrapper = document.getElementById("camera-wrapper");
     const status = document.getElementById("status");
     const statusText = document.getElementById("status-text");
@@ -549,9 +641,7 @@
       const metadataURL = URL_MODEL + "metadata.json";
 
       const response = await fetch(modelURL);
-      if (!response.ok) {
-        throw new Error("File model tidak ditemukan: " + modelURL);
-      }
+      if (!response.ok) throw new Error("File model tidak ditemukan: " + modelURL);
 
       model = await tmImage.load(modelURL, metadataURL);
       maxPredictions = model.getTotalClasses();
@@ -564,9 +654,11 @@
       placeholder.style.display = "none";
       cameraWrapper.appendChild(webcam.canvas);
       cameraWrapper.classList.add("active");
+
+      // Tampilkan card
+      detectedCard.style.display = "block";
       resultCard.style.display = "block";
 
-      // Siapkan label container
       labelContainer = document.getElementById("label-container");
       labelContainer.innerHTML = "";
       for (let i = 0; i < maxPredictions; i++) {
@@ -582,10 +674,7 @@
         labelContainer.appendChild(item);
       }
 
-      // Tampilkan kontrol kamera
       document.getElementById("camera-controls").style.display = "flex";
-
-      // Update UI
       btn.style.display = "none";
       statusText.textContent = "AI aktif — arahkan kamera ke sampah";
       status.classList.add("active");
@@ -606,63 +695,42 @@
     }
   }
 
-  // Setup webcam dengan facingMode
   async function setupWebcam() {
-    const width = 320;
-    const height = 320;
-
-    // Hapus canvas lama
+    const width = 320, height = 320;
     const wrapper = document.getElementById("camera-wrapper");
     const oldCanvas = wrapper.querySelector("canvas");
     if (oldCanvas) oldCanvas.remove();
-
-    // Stop webcam lama
-    if (webcam) {
-      try { webcam.stop(); } catch (e) { console.log("Stop:", e); }
-    }
-
+    if (webcam) { try { webcam.stop(); } catch (e) {} }
     webcam = new tmImage.Webcam(width, height, true);
     await webcam.setup({ facingMode: currentFacingMode });
     await webcam.play();
   }
 
-  // Switch kamera
   async function switchCamera() {
     if (!isRunning) return;
-
     currentFacingMode = (currentFacingMode === "environment") ? "user" : "environment";
     document.getElementById("camera-select").value = currentFacingMode;
-
     const statusText = document.getElementById("status-text");
     statusText.textContent = "Mengganti kamera...";
-
     try {
       await setupWebcam();
       document.getElementById("camera-wrapper").appendChild(webcam.canvas);
-      statusText.textContent = "Kamera " +
-        (currentFacingMode === "environment" ? "belakang" : "depan") + " aktif";
+      statusText.textContent = "Kamera " + (currentFacingMode === "environment" ? "belakang" : "depan") + " aktif";
     } catch (err) {
-      console.error("Gagal ganti kamera:", err);
       alert("Gagal ganti kamera: " + err.message);
-      statusText.textContent = "Gagal ganti kamera";
     }
   }
 
-  // Dropdown kamera
   async function changeCameraMode(mode) {
     currentFacingMode = mode;
     if (!isRunning) return;
-
     const statusText = document.getElementById("status-text");
     statusText.textContent = "Mengganti kamera...";
-
     try {
       await setupWebcam();
       document.getElementById("camera-wrapper").appendChild(webcam.canvas);
-      statusText.textContent = "Kamera " +
-        (currentFacingMode === "environment" ? "belakang" : "depan") + " aktif";
+      statusText.textContent = "Kamera " + (currentFacingMode === "environment" ? "belakang" : "depan") + " aktif";
     } catch (err) {
-      console.error("Gagal ganti kamera:", err);
       alert("Gagal ganti kamera: " + err.message);
     }
   }
@@ -674,11 +742,14 @@
     window.requestAnimationFrame(loop);
   }
 
+  // ============================================================
+  // PREDICT — update tampilan objek terdeteksi
+  // ============================================================
   async function predict() {
     const prediction = await model.predict(webcam.canvas);
 
-    let topIndex = 0;
-    let topProb = 0;
+    // Cari prediksi tertinggi
+    let topIndex = 0, topProb = 0;
     for (let i = 0; i < maxPredictions; i++) {
       if (prediction[i].probability > topProb) {
         topProb = prediction[i].probability;
@@ -686,6 +757,39 @@
       }
     }
 
+    // ===== Update kartu objek terdeteksi =====
+    const detectedObj = document.getElementById("detected-object");
+    const detectedEmoji = document.getElementById("detected-emoji");
+    const detectedName = document.getElementById("detected-name");
+    const detectedDesc = document.getElementById("detected-desc");
+    const detectedConf = document.getElementById("detected-confidence");
+
+    const topClass = prediction[topIndex].className;
+    const topPercent = (topProb * 100).toFixed(0);
+
+    // Kalau confidence < 50%, tampilkan "tidak yakin"
+    if (topProb < 0.5) {
+      detectedObj.className = "detected-object low-confidence";
+      detectedEmoji.textContent = "🤔";
+      detectedName.textContent = "Belum yakin";
+      detectedDesc.textContent = "Dekatkan objek ke kamera";
+      detectedConf.textContent = topPercent + "% yakin";
+    } else {
+      // Ambil info dari kamus OBJECT_INFO
+      const info = OBJECT_INFO[topClass] || {
+        emoji: "📦",
+        name: topClass,
+        desc: "Objek terdeteksi"
+      };
+
+      detectedObj.className = "detected-object";
+      detectedEmoji.textContent = info.emoji;
+      detectedName.textContent = info.name;
+      detectedDesc.textContent = info.desc;
+      detectedConf.textContent = topPercent + "% yakin";
+    }
+
+    // ===== Update list semua prediksi =====
     for (let i = 0; i < maxPredictions; i++) {
       const item = labelContainer.childNodes[i];
       const prob = (prediction[i].probability * 100).toFixed(0);
